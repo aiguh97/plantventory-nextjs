@@ -12,14 +12,14 @@ import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { Combobox } from "./ui/combo-box";
 import { useState } from "react";
-// import { getPlants } from "@/actions/plant.aciton";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton";
-// import CreateDialog from "./CreateDialog";
-// import EditDialog from "./EditDialog";
-// import DeleteDialog from "./DeleteDialog";
+import { getProducts } from "@/actions/product.action";
+import CreateDialog from "./CreateDialog";
+import EditDialog from "./EditDialog";
+import DeleteDialog from "./DeleteDialog";
 
-// type Plants = Awaited<ReturnType<typeof getPlants>>;
+type Plants = Awaited<ReturnType<typeof getProducts>>;
 
 interface InventoryTableProps {
   plants: Plants;
@@ -32,7 +32,7 @@ export default function InventoryTable({ plants }: InventoryTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filter plants by name and category (if selected)
-  const filteredPlants = plants?.userPlants?.filter(
+  const filteredPlants = plants?.userProducts?.filter(
     (plant) =>
       plant.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedCategory === "" || plant.category === selectedCategory)
@@ -142,15 +142,15 @@ export default function InventoryTable({ plants }: InventoryTableProps) {
                 <TableCell>{plant.name}</TableCell>
                 <TableCell>{plant.category}</TableCell>
                 <TableCell>{plant.price}</TableCell>
-                <TableCell className="font-bol">{plant.stock}</TableCell>
+                {/* <TableCell className="font-bol">{plant?.stock}</TableCell> */}
 
                 <TableCell className="text-right">
                   <div
                     className="flex justify-end space-x-4"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <EditDialog plant={plant}/>
-                    <DeleteDialog plant={plant}/>
+                    <EditDialog product={plant}/>
+                    <DeleteDialog product={plant}/>
 
                   </div>
                 </TableCell>
