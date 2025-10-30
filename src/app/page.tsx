@@ -31,7 +31,6 @@ export default function HomeClient({ initialProducts = [] }: HomeClientProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Scroll otomatis ke kanan saat awal render
   useEffect(() => {
     const container = scrollRef.current;
     if (container) {
@@ -40,7 +39,6 @@ export default function HomeClient({ initialProducts = [] }: HomeClientProps) {
     }
   }, [plants]);
 
-  // Deteksi apakah bisa scroll kiri/kanan
   const handleScroll = () => {
     const container = scrollRef.current;
     if (!container) return;
@@ -50,7 +48,6 @@ export default function HomeClient({ initialProducts = [] }: HomeClientProps) {
     setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
   };
 
-  // Klik tombol kiri / kanan
   const scroll = (direction: "left" | "right") => {
     const container = scrollRef.current;
     if (!container) return;
@@ -58,7 +55,6 @@ export default function HomeClient({ initialProducts = [] }: HomeClientProps) {
     container.scrollBy({ left: scrollAmount, behavior: "smooth" });
   };
 
-  // Fetch data dari API
   useEffect(() => {
     const fetchData = async () => {
       try {
