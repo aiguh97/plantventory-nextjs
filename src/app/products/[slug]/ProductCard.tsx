@@ -1,8 +1,8 @@
 import React from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Download } from "lucide-react";
-import AddToCartButton from "@/components/AddCartButton";
+import { motion } from "framer-motion";
+import { MdShoppingCart } from "react-icons/md";
+import { FaStar } from "react-icons/fa";
+import Image from "next/image";
 
 type Product = {
   id: string;
@@ -17,115 +17,70 @@ type Product = {
 };
 
 interface ProductCardProps {
-  product: Product | null;
+  product: Product;
+  flag?: boolean;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
-  if (!product) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Product data is not available.</p>
-      </div>
-    );
-  }
+export default function ProductCard({
+  product,
+  flag = false,
+}: ProductCardProps) {
+  const imageSrc = product?.imageUrl;
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+    <div
+      key={product?.id}
+      className={`relative bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-4 flex flex-col items-center justify-evenly gap-3 
+      ${flag ? "h-[320px]" : "h-[260px]"}`}
+    >
+      {/* Top Section */}
+      <div className="w-full flex items-center justify-between">
         {/* Product Image */}
-        <div className="order-1">
-          <Card className="overflow-hidden border-0 shadow-lg">
-            <CardHeader className="p-0">
-              {product.imageUrl ? (
-                <div className="aspect-[16/9] overflow-hidden bg-gradient-to-br from-muted/50 to-muted">
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  />
-                </div>
-              ) : (
-                <div className="aspect-square bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center">
-                  <Download className="h-16 w-16 text-muted-foreground" />
-                </div>
-              )}
-            </CardHeader>
-          </Card>
-        </div>
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          className="relative w-36 h-36 -mt-12 drop-shadow-lg"
+        >
+          <img
+            src={imageSrc || "https://placehold.co/400x400?text=No+Image"}
+            alt={product?.name || "Product Image"}
+            className="h-full w-full object-contain rounded-lg"
+          />
+        </motion.div>
 
-        {/* Product Information */}
-        <div className="order-2 flex flex-col justify-center space-y-6">
-          <div className="space-y-4">
-            {product.category && (
-              <Badge variant="secondary" className="w-fit text-sm">
-                {product.category}
-              </Badge>
-            )}
+        {/* Cart Icon */}
+        <motion.div
+          whileTap={{ scale: 0.8 }}
+          className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center cursor-pointer hover:shadow-md"
+          onClick={() => console.log("Add to cart:", product.name)}
+        >
+          <MdShoppingCart className="text-white text-lg" />
+        </motion.div>
+      </div>
 
-            <div className="space-y-3">
-              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
-                {product.name}
-              </h1>
+      {/* Product Info */}
+      <div className="w-full flex flex-col items-end justify-end -mt-2 gap-2">
+        <p className="text-gray-800 font-semibold text-base md:text-lg text-right">
+          {product?.name}
+        </p>
 
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-primary">
-                  ${product.price.toFixed(2)}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  Digital Download
-                </span>
-              </div>
-            </div>
-
-            {product.description && (
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                {product.description}
-              </p>
-            )}
+     {flag && (
+          <div className=" flex items-end flex-col justify-center">
+            <p className="text-sm text-green-500 mb-1 capitalize">
+              {product.category}
+            </p>
+            <p className="text-[.8rem] text-gray-500 text-right">
+              {product?.description}
+            </p>
           </div>
+        )}
 
-          {/* Purchase Section */}
-          <div className="space-y-4 pt-4">
-            <AddToCartButton productId={product.id} />
-
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                <span>Instant Download</span>
-              </div>
-              <div className="h-4 w-px bg-border" />
-              <span>Digital Product</span>
-            </div>
-          </div>
-
-          {/* Product Details */}
-          <Card className="mt-8">
-            <CardContent className="p-6">
-              <h3 className="font-semibold mb-4">Product Details</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Category</span>
-                  <span className="font-medium">
-                    {product.category ?? "Uncategorized"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Type</span>
-                  <span className="font-medium">Digital Download</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Delivery</span>
-                  <span className="font-medium">Instant</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Updated</span>
-                  <span className="font-medium">
-                    {new Date(product.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="w-full flex items-center justify-between mt-1">
+          <p className="text-sm text-gray-500 flex items-center gap-1">
+            <FaStar className="text-yellow-400" /> 4.6
+          </p>
+          <p className="text-lg text-green-600 font-semibold">
+            ₹ {product?.price}
+          </p>
         </div>
       </div>
     </div>

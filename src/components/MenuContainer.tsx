@@ -26,7 +26,6 @@ export default function MenuClient({ initialProducts }: MenuClientProps) {
   const [filter, setFilter] = useState<string>("all");
   const [plants, setPlants] = useState<Product[]>(initialProducts);
 
-  // optional: refresh via API route (tanpa error async/await)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,9 +41,14 @@ export default function MenuClient({ initialProducts }: MenuClientProps) {
     fetchData();
   }, []);
 
-  const filteredPlants = plants.filter(
-    (plant) => filter === "all" || plant.category === filter
-  );
+  // === PERBAIKAN FILTER ===
+  const filteredPlants = plants.filter((plant) => {
+    if (filter === "all") return true;
+    // Normalisasi nama kategori agar tidak case sensitive dan tidak error jika null
+    const plantCategory = (plant.category || "").trim().toLowerCase();
+    const selectedCategory = filter.toLowerCase();
+    return plantCategory === selectedCategory;
+  });
 
   return (
     <section className="w-full mb-6 pt-24" id="ourPlants">
@@ -54,18 +58,35 @@ export default function MenuClient({ initialProducts }: MenuClientProps) {
         </p>
 
         {/* Category Filter */}
-        <div className="w-full flex items-center justify-start lg:justify-center gap-8 py-6 overflow-x-scroll scrollbar-none">
+        <div className="w-full flex items-center justify-start lg:justify-center gap-4 py-6 overflow-x-scroll scrollbar-none">
+          {/* Tambahkan tombol 'All' */}
+          <motion.div
+            whileTap={{ scale: 0.9 }}
+            className={`group ${
+              filter === "all" ? "bg-cartNumBg" : "bg-card"
+            } min-w-[80px] h-10 px-4 cursor-pointer rounded-lg flex items-center justify-center hover:bg-cartNumBg`}
+            onClick={() => setFilter("all")}
+          >
+            <p
+              className={`text-sm ${
+                filter === "all" ? "text-white" : "text-textColor"
+              }`}
+            >
+              All
+            </p>
+          </motion.div>
+
           {categories?.map((category) => (
             <motion.div
-              whileTap={{ scale: 0.75 }}
+              whileTap={{ scale: 0.9 }}
               key={category.id}
               className={`group ${
                 filter === category.urlParamName ? "bg-cartNumBg" : "bg-card"
-              } w-auto min-w-[94px] h-10 p-4 cursor-pointer rounded-lg drop-shadow-md flex flex-col gap-3 items-center justify-center hover:bg-cartNumBg`}
+              } min-w-[100px] h-10 px-4 cursor-pointer rounded-lg flex items-center justify-center hover:bg-cartNumBg`}
               onClick={() => setFilter(category.urlParamName)}
             >
               <p
-                className={`text-sm group-hover:text-white text-center ${
+                className={`text-sm text-center ${
                   filter === category.urlParamName
                     ? "text-white"
                     : "text-textColor"
@@ -78,10 +99,11 @@ export default function MenuClient({ initialProducts }: MenuClientProps) {
         </div>
 
         {/* Product List */}
-        <div className="w-full grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="w-full grid md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-28">
           {filteredPlants.length > 0 ? (
             filteredPlants.map((plant) => (
               <ProductCard
+              flag={false}
                 key={plant.id}
                 product={{
                   ...plant,
