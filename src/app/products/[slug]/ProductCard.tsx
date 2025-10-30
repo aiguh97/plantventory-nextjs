@@ -1,26 +1,23 @@
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ShoppingCart, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import AddToCartButton from "@/components/AddCartButton";
-// import AddToCartButton from "@/components/AddtoCartButton";
 
-// Mock type based on your schema
 type Product = {
   id: string;
   name: string;
-  description?: string;
-  category?: string;
+  description: string | null;
+  category: string | null;
   price: number;
-  imageUrl?: string;
+  imageUrl: string | null;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
 };
 
 interface ProductCardProps {
-  product: Product | null; // Allow product to be null for error handling
+  product: Product | null;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
@@ -59,9 +56,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Product Information */}
         <div className="order-2 flex flex-col justify-center space-y-6">
           <div className="space-y-4">
-            <Badge variant="secondary" className="w-fit text-sm">
-              {product.category}
-            </Badge>
+            {product.category && (
+              <Badge variant="secondary" className="w-fit text-sm">
+                {product.category}
+              </Badge>
+            )}
 
             <div className="space-y-3">
               <h1 className="text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
@@ -87,7 +86,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Purchase Section */}
           <div className="space-y-4 pt-4">
-              <AddToCartButton productId={product.id} />
+            <AddToCartButton productId={product.id} />
 
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
@@ -106,7 +105,9 @@ export default function ProductCard({ product }: ProductCardProps) {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Category</span>
-                  <span className="font-medium">{product.category}</span>
+                  <span className="font-medium">
+                    {product.category ?? "Uncategorized"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type</span>
@@ -119,7 +120,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Updated</span>
                   <span className="font-medium">
-                    {product.updatedAt.toLocaleDateString()}
+                    {new Date(product.updatedAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>

@@ -40,8 +40,10 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
+                {/* <div className="w-screen h-auto flex flex-col bg-primary  "> */}
               <Navbar />
               {children}
+              {/* </div> */}
             </ThemeProvider>
           </StackTheme>
         </StackProvider>

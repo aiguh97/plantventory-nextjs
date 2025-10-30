@@ -6,11 +6,10 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { stackServerApp } from "@/stack";
 
-
-// Get all products with optional search (visible to everyone)
+// Get all products with optional search
 export async function getProducts(searchTerm?: string) {
   try {
-    const whereClause: any = {};
+    const whereClause: Record<string, any> = {};
 
     if (searchTerm) {
       whereClause.name = {
@@ -26,42 +25,27 @@ export async function getProducts(searchTerm?: string) {
     revalidatePath("/");
     return { success: true, userProducts };
   } catch (error) {
-    console.log("Error in getProducts", error);
+    console.error("Error in getProducts", error);
+    return { success: false, userProducts: [] };
   }
 }
 
-
-// Get single product by ID
+// Get single product
 export async function getProductById(id: string) {
-  return await prisma.product.findUnique({
+  return prisma.product.findUnique({
     where: { id },
   });
 }
 
+// Create product
 export async function createProduct(data: Prisma.ProductCreateInput) {
-  console.log("Creating product:", data);
-  
   try {
-    const user = await stackServerApp.getUser();
-    const currentUserId = await getUserId()
-    console.log("sdakdadj",currentUserId)
-    if(!currentUserId) return
-
-    // const adminId = process.env.ADMIN_ID;
-    // const adminEmail = process.env.ADMIN_EMAIL;
-
-    // const isAdmin =
-    //   user && user.id === adminId && user.primaryEmail === adminEmail;
-
-    // if (!isAdmin) {
-    //   console.error("Unauthorized create attempt");
-    //   return null; // or throw new Error("Unauthorized")
-    // }
+    const currentUserId = await getUserId();
+    if (!currentUserId) throw new Error("Unauthorized");
 
     const newProduct = await prisma.product.create({
       data: {
         ...data,
-        // userId: user.id,
         userId: currentUserId,
       },
     });
@@ -74,8 +58,7 @@ export async function createProduct(data: Prisma.ProductCreateInput) {
   }
 }
 
-
-// Update a product
+// Update product
 export async function editProduct(id: string, data: Prisma.ProductUpdateInput) {
   try {
     const currentUserId = await getUserId();
@@ -96,43 +79,38 @@ export async function editProduct(id: string, data: Prisma.ProductUpdateInput) {
   }
 }
 
-// Delete a product and clean up any empty orders
+// Delete product
 export async function deleteProduct(id: string) {
   try {
-    console.log("Deleting:", id);
     const currentUserId = await getUserId();
     if (!currentUserId) return;
 
-    // 0. Delete CartItems first
+    // Hapus CartItems terlebih dahulu
     await prisma.cartItem.deleteMany({
       where: { productId: id },
     });
 
-    // 1. Find orders that include this product
+    // Ambil order terkait
     const orderItems = await prisma.orderItem.findMany({
       where: { productId: id },
       select: { orderId: true },
     });
 
-    const orderIds = Array.from(
-      new Set(orderItems.map((item) => item.orderId))
-    );
+    const orderIds = Array.from(new Set(orderItems.map((item) => item.orderId)));
 
-    // 2. Delete the product (this will cascade delete orderItems)
+    // Hapus produk
     const deletedProduct = await prisma.product.delete({
       where: { id },
     });
 
-    // 3. Delete orders that are now empty
+    // Hapus order kosong
     for (const orderId of orderIds) {
       const remaining = await prisma.orderItem.count({
         where: { orderId },
       });
 
       if (remaining === 0) {
-        await prisma.order.delete({
-          where: { id: orderId },
-        });
+        await prisma.order.delete({ where: { id: orderId } });
       }
     }
 
