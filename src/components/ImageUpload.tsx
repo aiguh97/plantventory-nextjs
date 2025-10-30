@@ -1,55 +1,44 @@
-// import { OurFileRouter } from "@/app/api/uploadthing/core";
+"use client";
+
+import { UploadButton } from "@uploadthing/react";
 import { OurFileRouter } from "@/app/api/uploadthing/core";
-import { UploadDropzone } from "@uploadthing/react";
-import { XIcon } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
-interface ImageUploadProps {
-  onChange: (url: string) => void;
+export default function ImageUpload({
+  endpoint,
+  value,
+  onChange,
+}: {
+  endpoint: keyof OurFileRouter;
   value: string;
-  endpoint: "postImage";
-}
-
-function ImageUpload({ endpoint, onChange, value }: ImageUploadProps) {
-  if (value) {
-    return (
-      <div className="relative size-40">
-        <img
-          src={value}
-          alt="Upload"
-          className="rounded-md w-full h-full object-cover"
-        />
-        <button
-          onClick={() => onChange("")}
-          className="absolute top-0 right-0 p-1 bg-red-500 rounded-full shadow-sm"
-          type="button"
-        >
-          <XIcon className="h-4 w-4 text-white" />
-        </button>
-      </div>
-    );
-  }
+  onChange: (url: string) => void;
+}) {
+  const [preview, setPreview] = useState(value);
 
   return (
-    <div className="w-25 flex items-center">
-      <UploadDropzone<OurFileRouter, "postImage">
+    <div className="flex flex-col items-center gap-3">
+      {preview && (
+        <img
+          src={preview}
+          alt="Preview"
+          className="w-40 h-40 object-cover rounded-md border"
+        />
+      )}
+
+      <UploadButton<OurFileRouter,"postImage">
         endpoint={endpoint}
         onClientUploadComplete={(res) => {
-          // Do something with the response
-          console.log("Files: ", res);
-                    //updates the image
-
-          if (res && res[0]?.ufsUrl) {
-            onChange(res[0].ufsUrl);
+          console.log("UPLOAD RESULT:", res);
+          if (res?.[0]?.url) {
+            onChange(res[0].url);
+            setPreview(res[0].url);
           }
-        
         }}
-        onUploadError={(error: Error) => {
-          alert(`ERROR! ${error.message}`);
+        onUploadError={(err) => {
+          console.error("Upload error:", err);
+          alert(`Upload failed: ${err.message}`);
         }}
       />
     </div>
   );
 }
-
-export default ImageUpload;
