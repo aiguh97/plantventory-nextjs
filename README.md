@@ -8,11 +8,11 @@ User can add multiple items into carts where it shows the total amount to be pai
 
 - React
 - Hooks
-- Firebase
+- Neon
 - Framer motion
 - Tailwind CSS
 - Redux
-- Netlify
+- Vercel
 - React Router
 
 ## Screentshots 📺

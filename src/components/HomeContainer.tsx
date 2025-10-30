@@ -58,45 +58,44 @@ const HomeContainer: React.FC = () => {
         />
 
         {/* floating cards */}
-      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center p-6">
-  <div className="grid xl:grid-cols-3 md:grid-cols-2 gap-6 gap-y-20 place-items-center">
-    {heroData &&
-      heroData.map((n: HeroItem, i: number) => {
-        const isLast = i === heroData.length - 1;
-        const remainder3 = heroData.length % 3;
-        const centerIn3Cols = remainder3 === 1 && isLast; // kalau ganjil dan terakhir
+        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center p-6">
+          <div className="grid xl:grid-cols-3 grid-cols-2 gap-6 gap-y-20 place-items-center">
+            {heroData &&
+              heroData.map((n: HeroItem, i: number) => {
+                const isLast = i === heroData.length - 1;
+                const remainder3 = heroData.length % 3;
+                const centerIn3Cols = remainder3 === 1 && isLast; // kalau ganjil dan terakhir
 
-        return (
-          <div
-            key={n.id}
-            className={`
+                return (
+                  <div
+                    key={n.id}
+                    className={`
               w-36 lg:w-48 bg-white/80 backdrop-blur-md rounded-3xl drop-shadow-xl
               flex flex-col items-center justify-center p-4 relative
               ${centerIn3Cols ? "xl:col-start-2" : ""}
             `}
-          >
-            <div className="w-20 h-20 lg:w-28 lg:h-28 -mt-12 relative z-10">
-              <Image
-                src={n.imageSrc}
-                alt={n.name}
-                className="object-contain w-full h-full"
-              />
-            </div>
-            <p className="text-sm lg:text-lg font-semibold text-gray-800 mt-3 text-center">
-              {n.name}
-            </p>
-            <p className="text-[10px] lg:text-sm text-gray-500 font-medium my-1 text-center">
-              {n.decp}
-            </p>
-            <p className="text-sm font-semibold text-gray-800">
-              <span className="text-red-600 text-sm">₹</span> {n.prize}
-            </p>
+                  >
+                    <div className="w-20 h-20 lg:w-28 lg:h-28 -mt-12 relative z-10">
+                      <Image
+                        src={n.imageSrc}
+                        alt={n.name}
+                        className="object-contain w-full h-full"
+                      />
+                    </div>
+                    <p className="text-sm lg:text-lg font-semibold text-gray-800 mt-3 text-center">
+                      {n.name}
+                    </p>
+                    <p className="text-[10px] lg:text-sm text-gray-500 font-medium my-1 text-center">
+                      {n.decp}
+                    </p>
+                    <p className="text-sm font-semibold text-gray-800">
+                      <span className="text-red-600 text-sm">₹</span> {n.prize}
+                    </p>
+                  </div>
+                );
+              })}
           </div>
-        );
-      })}
-  </div>
-</div>
-
+        </div>
       </div>
     </section>
   );

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { motion } from "framer-motion";
 import { MdShoppingCart } from "react-icons/md";
@@ -21,11 +23,10 @@ interface ProductCardProps {
   flag?: boolean;
 }
 
-export default function ProductCard({
-  product,
-  flag = false,
-}: ProductCardProps) {
-  const imageSrc = product?.imageUrl;
+export default function ProductCard({ product, flag = false }: ProductCardProps) {
+  const imageSrc =
+    product?.imageUrl ||
+    "/placeholder.png"; // 🟢 optional fallback image di public folder
 
   return (
     <div
@@ -40,10 +41,12 @@ export default function ProductCard({
           whileHover={{ scale: 1.1 }}
           className="relative w-36 h-36 -mt-12 drop-shadow-lg"
         >
-          <img
-            src={imageSrc || "https://placehold.co/400x400?text=No+Image"}
+          <Image
+            src={imageSrc}
             alt={product?.name || "Product Image"}
-            className="h-full w-full object-contain rounded-lg"
+            fill
+            sizes="150px"
+            className="object-contain rounded-lg"
           />
         </motion.div>
 
@@ -63,16 +66,14 @@ export default function ProductCard({
           {product?.name}
         </p>
 
-     {flag && (
-          <div className=" flex items-end flex-col justify-center">
-            <p className="text-sm text-green-500 mb-1 capitalize">
-              {product.category}
-            </p>
-            <p className="text-[.8rem] text-gray-500 text-right">
-              {product?.description}
-            </p>
-          </div>
-        )}
+        <div className="flex flex-col items-end text-right">
+          <p className="text-sm text-green-600 mb-1 capitalize">
+            {product?.category || "Uncategorized"}
+          </p>
+          <p className="text-xs text-gray-500 line-clamp-2 max-w-[220px]">
+            {product?.description || "No description available."}
+          </p>
+        </div>
 
         <div className="w-full flex items-center justify-between mt-1">
           <p className="text-sm text-gray-500 flex items-center gap-1">

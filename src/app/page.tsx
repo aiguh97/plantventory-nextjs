@@ -1,40 +1,143 @@
-// ❌ hapus "use client"
+"use client";
+
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import HomeContainer from "@/components/HomeContainer";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import HomeContainer from "@/components/HomeContainer";
 import Footer from "@/components/Footer";
 import MenuContainer from "@/components/MenuContainer";
-import { getProducts } from "@/actions/product.action"; // contoh
+import ProductCard from "@/app/products/[slug]/ProductCard";
 
-export default async function Home() {
-  const products = await getProducts();
+type Product = {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  price: number;
+  imageUrl: string | null;
+  downloadUrl?: string | null;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
-  // 🟢 convert Date ke string agar cocok dengan type Product di client
-  const serializedProducts = products.userProducts.map((p: any) => ({
-    ...p,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-  }));
+interface HomeClientProps {
+  initialProducts?: Product[];
+}
+
+export default function HomeClient({ initialProducts = [] }: HomeClientProps) {
+  const [plants, setPlants] = useState<Product[]>(initialProducts);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Scroll otomatis ke kanan saat awal render
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (container) {
+      container.scrollLeft = container.scrollWidth;
+      handleScroll();
+    }
+  }, [plants]);
+
+  // Deteksi apakah bisa scroll kiri/kanan
+  const handleScroll = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+  };
+
+  // Klik tombol kiri / kanan
+  const scroll = (direction: "left" | "right") => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const scrollAmount = direction === "left" ? -300 : 300;
+    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+  };
+
+  // Fetch data dari API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        if (data?.success && Array.isArray(data.userProducts)) {
+          setPlants(data.userProducts);
+        }
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <AnimatePresence>
-      <main className="mt-24 px-4 md:px-16 w-full">
+      <main className="mt-24 px-4 md:px-16 w-full relative">
         <div className="flex flex-col items-center justify-center w-full">
           <HomeContainer />
-          <section className="w-full my-10">
-            <div className="w-full flex items-center justify-between mb-4">
-              <p className="text-2xl font-semibold capitalize text-gray-800 relative before:absolute before:rounded-lg before:w-32 before:h-1 before:-bottom-2 before:left-0 before:bg-gradient-to-tr from-green-400 to-green-600">
-                Customer Favourites
-              </p>
+
+          <section className="w-full my-10 relative">
+            <p className="text-2xl font-semibold capitalize text-gray-800 mb-6 relative before:absolute before:rounded-lg before:w-32 before:h-1 before:-bottom-2 before:left-0 before:bg-gradient-to-tr from-green-400 to-green-600">
+              Customer Favourites
+            </p>
+
+            {/* Tombol kiri */}
+            {canScrollLeft && (
+              <motion.div
+                whileTap={{ scale: 0.85 }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-green-400 hover:bg-green-500 shadow-md cursor-pointer flex items-center justify-center transition-all duration-200"
+                onClick={() => scroll("left")}
+              >
+                <MdChevronLeft className="text-2xl text-white" />
+              </motion.div>
+            )}
+
+            {/* Tombol kanan */}
+            {canScrollRight && (
+              <motion.div
+                whileTap={{ scale: 0.85 }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-green-400 hover:bg-green-500 shadow-md cursor-pointer flex items-center justify-center transition-all duration-200"
+                onClick={() => scroll("right")}
+              >
+                <MdChevronRight className="text-2xl text-white" />
+              </motion.div>
+            )}
+
+            {/* Scroll container */}
+            <div
+              ref={scrollRef}
+              onScroll={handleScroll}
+              className="flex overflow-x-auto scrollbar-hide gap-6 scroll-smooth py-4"
+            >
+              {plants && plants.length > 0 ? (
+                plants.map((plant) => (
+                  <div key={plant.id} className="min-w-[260px] flex-shrink-0">
+                    <ProductCard
+                      flag={true}
+                      product={{
+                        ...plant,
+                        createdAt: new Date(plant.createdAt),
+                        updatedAt: new Date(plant.updatedAt),
+                      }}
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-center w-full py-10">
+                  No products found for this category.
+                </p>
+              )}
             </div>
           </section>
 
-          {/* ✅ kirim yang sudah di-serialize */}
-          <MenuContainer initialProducts={serializedProducts} />
+          <MenuContainer initialProducts={initialProducts} />
           <Footer />
         </div>
       </main>
     </AnimatePresence>
   );
 }
-
